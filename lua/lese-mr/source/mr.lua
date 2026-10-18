@@ -1,11 +1,15 @@
 local define = require("lese.define")
 
+---Which vim-mr list: most recently used files, written files, repositories
+---or directories.
 ---@alias lese-mr.Type "mru"|"mrw"|"mrr"|"mrd"
 
+---The detail of an item lese-mr.source.mr emits.
 ---@class lese-mr.source.MrDetail
 ---@field path string            -- the path as vim-mr recorded it
 ---@field mr { type: lese-mr.Type } -- the list the path came from
 
+---Options of lese-mr.source.mr.
 ---@class lese-mr.source.MrOptions
 ---@field type? lese-mr.Type -- the list to read, default "mru"
 

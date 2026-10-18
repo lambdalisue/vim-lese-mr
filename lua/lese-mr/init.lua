@@ -1,21 +1,42 @@
 -- Loading this module declares nothing; users bring the pickers in from their
 -- custom.lua with define_pickers, or use the modules in pickers of their own.
 
+---The sources lese-mr provides.
+---@class lese-mr.Sources
+---Emits the paths vim-mr lists for `opts.type` ("mru" by default, or "mrw",
+---"mrr", "mrd"), newest first, with `detail.path` and `detail.mr.type`.
+---@field mr fun(opts?: lese-mr.source.MrOptions): lese.Source
+
+---The actions lese-mr provides.
+---@class lese-mr.Actions
+---Deletes the selected items, or the item under the cursor, from the vim-mr
+---list each came from.
+---@field mr_delete fun(): lese.Action
+---`{ ["mr-delete"] = mr_delete() }`, to merge into a picker's actions.
+---@field default_mr_delete_actions table<string, lese.Action>
+
+---What `require("lese-mr")` returns.
+---@class lese-mr
+---Sources that read vim-mr's lists.
+---@field source lese-mr.Sources
+---Actions on the items those sources emit.
+---@field action lese-mr.Actions
 local M = {}
 
 M.source = {
   mr = require("lese-mr.source.mr"),
 }
 
+local mr_delete = require("lese-mr.action.mr_delete")
+
 M.action = {
-  mr_delete = require("lese-mr.action.mr_delete"),
+  mr_delete = mr_delete,
+  default_mr_delete_actions = {
+    ["mr-delete"] = mr_delete(),
+  },
 }
 
----`mr-delete`, to merge into a picker's actions.
-M.action.default_mr_delete_actions = {
-  ["mr-delete"] = M.action.mr_delete(),
-}
-
+---How `define_pickers` declares its pickers.
 ---@class lese-mr.PickersOptions
 ---@field actions? table<string, lese.Action> -- merged into every picker's actions, over the defaults
 ---@field names? table<string, string|false>  -- rename a picker (`mru = "recent"`) or leave it out (`mrd = false`)
