@@ -37,12 +37,12 @@ fmt-check:
 
 # Lint with lese's selene standard, and type-check the LuaCATS annotations.
 lint:
-    cp "{{lese}}/selene/lese.yml" lese.yml
+    cp -- {{quote(lese)}}/selene/lese.yml lese.yml
     selene .
     # .luarc.json finds lese in .deps/vim-lese; point a copy at LESE_PATH instead.
     if [ -n "${LESE_PATH:-}" ]; then \
       mkdir -p .deps; \
-      LIB="$(cd "$LESE_PATH" && pwd)/lua" perl -pe 's#"\.deps/vim-lese/lua"#"$ENV{LIB}"#' .luarc.json > .deps/luarc.json; \
+      LIB="$(CDPATH= cd -- "$LESE_PATH" && pwd)/lua" perl -MJSON::PP -0777 -ne '$c = JSON::PP->new->canonical->pretty; $j = $c->decode($_); $j->{"workspace.library"} = [ map { $_ eq ".deps/vim-lese/lua" ? $ENV{LIB} : $_ } @{ $j->{"workspace.library"} } ]; print $c->encode($j)' .luarc.json > .deps/luarc.json; \
       config=.deps/luarc.json; \
     else \
       config=.luarc.json; \
@@ -55,7 +55,7 @@ test filter="":
 
 # Run the tests on one host: nvim, vim or vim-luajit.
 test-on host filter="":
-    TEST_FILTER="$2" {{ if host == "nvim" { "nvim --headless --clean" } else { host + " -Nu NONE -i NONE -es" } }} --cmd 'set rtp^={{lese}},.' -c 'luafile test/run.lua' </dev/null
+    LESE_TEST_ROOT={{quote(lese)}} TEST_FILTER="$2" {{ if host == "nvim" { "nvim --headless --clean" } else { host + " -Nu NONE -i NONE -es" } }} --cmd 'let &rtp = escape($LESE_TEST_ROOT, ",") . ",.," . &rtp' -c 'luafile test/run.lua' </dev/null
 
 # Run the tests and write every snapshot they compare with anew.
 snapshot filter="":
@@ -63,7 +63,7 @@ snapshot filter="":
 
 # Run a picker of test/custom.lua headlessly on Neovim and Vim and fail when they differ.
 run *args:
-    "{{lese}}/bin/lese-run" --host=both --rtp . --custom test/custom.lua "$@"
+    {{quote(lese)}}/bin/lese-run --host=both --rtp . --custom test/custom.lua "$@"
 
 # Run the mrw picker on both editors against the stand-in vim-mr in
 # test/fixture, whose lists do not depend on the editing history of the machine.
