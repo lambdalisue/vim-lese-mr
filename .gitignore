@@ -1,0 +1,8 @@
+/.envrc
+.direnv/
+result
+/.claude/worktrees/
+/doc/tags
+# The lese checkout `just deps` clones, and what `just lint` derives from it.
+/.deps/
+/lese.yml
