@@ -1,0 +1,113 @@
+*lese-mr.txt*	vim-mr's lists in lese, the fuzzy finder for Vim and Neovim
+
+Author:  Alisue <lambdalisue@gmail.com>
+License: MIT License (See LICENSE)
+
+=============================================================================
+CONTENTS					*lese-mr-contents*
+
+INTRODUCTION			|lese-mr-introduction|
+REQUIREMENTS			|lese-mr-requirements|
+USAGE				|lese-mr-usage|
+INTERFACE			|lese-mr-interface|
+  PICKERS			|lese-mr-pickers|
+  MODULES			|lese-mr-modules|
+
+=============================================================================
+INTRODUCTION					*lese-mr-introduction*
+
+lese-mr lists the files, repositories and directories vim-mr records in
+lese pickers, and deletes entries from those lists. Loading it declares
+nothing; bring its pickers in from your custom.lua (|lese-mr-usage|).
+
+=============================================================================
+REQUIREMENTS					*lese-mr-requirements*
+
+lese (https://github.com/lambdalisue/vim-lese) on Neovim, or on Vim built
+with |+lua|, and vim-mr (https://github.com/lambdalisue/vim-mr). Without
+vim-mr a picker fails with "lese-mr: vim-mr (lambdalisue/vim-mr) is
+required".
+
+=============================================================================
+USAGE						*lese-mr-usage*
+
+Call |lese-mr.define_pickers()| from the function your custom.lua returns
+(:LeseCustom opens it):
+>lua
+	return function(x)
+	  -- ... your own pickers ...
+	  require("lese-mr").define_pickers(x)
+	end
+<
+Or use the modules in pickers of your own (|lese-mr-modules|).
+
+=============================================================================
+INTERFACE					*lese-mr-interface*
+
+-----------------------------------------------------------------------------
+PICKERS						*lese-mr-pickers*
+
+					*lese-mr.define_pickers()*
+require("lese-mr").define_pickers({x} [, {opts}])
+	Declare the pickers below on the entrypoint {x} custom.lua receives.
+	Each matches with fzf and offers lese's default open, systemopen,
+	cd, quickfix, echo and yank actions, and "mr-delete".
+
+	{opts} may hold:
+	  actions	A table of actions merged into every picker's
+			actions, over the defaults.
+	  names		A table from a picker's name below to the name to
+			declare it under, or to false to leave it out:
+			`{ mru = "recent", mrd = false }`
+
+						*lese-mr-picker-mru*
+:Lese mru
+	The most recently used files. Opens the file by default and
+	previews it.
+
+						*lese-mr-picker-mrw*
+:Lese mrw
+	The most recently written files under the current directory, shown
+	relative to it. Opens the file by default and previews it.
+
+						*lese-mr-picker-mrr*
+:Lese mrr
+	The most recently used repositories. "cd-and-open", the default,
+	changes the current directory to the repository and opens it. The
+	picker shows no preview.
+
+						*lese-mr-picker-mrd*
+:Lese mrd
+	The most recently used directories, with the actions of
+	|lese-mr-picker-mrr|.
+
+-----------------------------------------------------------------------------
+MODULES						*lese-mr-modules*
+
+require("lese-mr") holds the modules as `source.mr`, `action.mr_delete`
+and `action.default_mr_delete_actions`.
+
+					*lese-mr.source.mr*
+require("lese-mr.source.mr")([{opts}])
+	A source that emits the paths vim-mr lists (mr#{type}#list()), in
+	that order, numbered from 1. The detail holds the `path` and
+	`mr.type`, the list it came from.
+
+	{opts} may hold:
+	  type	"mru", "mrw", "mrr" or "mrd". Default: "mru"
+
+					*lese-mr.action.mr_delete*
+require("lese-mr.action.mr_delete")()
+	An action that deletes each selected item, or the item under the
+	cursor, from the vim-mr list in its `mr.type` with
+	mr#{type}#delete(). Items that did not come from
+	|lese-mr.source.mr| are skipped. vim-mr writes the change to its
+	file after a short delay (g:mr#delay), so a list read right away
+	may still hold the item.
+
+				*lese-mr.action.default_mr_delete_actions*
+require("lese-mr").action.default_mr_delete_actions
+	`{ ["mr-delete"] = mr_delete() }`, to merge into a picker's actions.
+
+=============================================================================
+vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
