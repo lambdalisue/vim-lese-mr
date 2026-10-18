@@ -1,0 +1,5 @@
+# lese.yml is copied from the lese checkout by `just lint`. It declares the
+# Lua 5.1 library and nothing of `vim`, so code reaches the editor only through
+# ctx.host (or require("lese.host") in tests).
+std = "lese"
+exclude = [".deps/**"]
